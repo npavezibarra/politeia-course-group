@@ -43,6 +43,9 @@ add_action( 'plugins_loaded', function() {
 
     // REST endpoints
     new PCG_REST();
+
+    // Admin menu
+    new PCG_Admin_Menu();
 });
 
 /**
