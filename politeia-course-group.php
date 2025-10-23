@@ -45,7 +45,10 @@ add_action( 'plugins_loaded', function() {
     new PCG_REST();
 
     // Admin menu
-    new PCG_Admin_Menu();
+    require_once plugin_dir_path( __FILE__ ) . 'includes/class-pcg-admin.php';
+    if ( class_exists( 'PCG_Admin_Menu' ) ) {
+        new PCG_Admin_Menu();
+    }
 });
 
 /**
