@@ -43,6 +43,14 @@ add_action( 'plugins_loaded', function() {
 
     // REST endpoints
     new PCG_REST();
+
+});
+
+add_action( 'plugins_loaded', function() {
+    require_once plugin_dir_path(__FILE__) . 'includes/class-pcg-admin.php';
+    if ( class_exists( 'PCG_Admin_Menu' ) ) {
+        new PCG_Admin_Menu();
+    }
 });
 
 /**
