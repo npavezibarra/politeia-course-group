@@ -18,17 +18,20 @@ class PCG_Admin_Menu {
     }
 
     public function render_page() {
-        $programs_url    = admin_url( 'edit.php?post_type=course_program' );
+        if ( ! class_exists( 'PCG_Programs_Table' ) ) {
+            require_once plugin_dir_path( __FILE__ ) . 'class-pcg-programs-table.php';
+        }
+
+        $table = new PCG_Programs_Table();
+        $table->prepare_items();
+
         $new_program_url = admin_url( 'post-new.php?post_type=course_program' );
         ?>
         <div class="wrap">
-            <h1>Programa Politeia</h1>
-            <p>Bienvenido al panel de administración del plugin <strong>Politeia Course Group</strong>.</p>
-
-            <ul>
-                <li><a href="<?php echo esc_url( $programs_url ); ?>">Ver Programas Filosóficos</a></li>
-                <li><a href="<?php echo esc_url( $new_program_url ); ?>">Agregar nuevo Programa</a></li>
-            </ul>
+            <h1 class="wp-heading-inline">Programa Politeia</h1>
+            <a href="<?php echo esc_url( $new_program_url ); ?>" class="page-title-action">Agregar nuevo Programa</a>
+            <hr class="wp-header-end">
+            <?php $table->display(); ?>
         </div>
         <?php
     }
