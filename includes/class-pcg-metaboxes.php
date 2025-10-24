@@ -5,16 +5,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class PCG_Metaboxes {
 
-    const PRICE_META_KEY   = 'politeia_program_price';
-    const COURSES_META_KEY = 'politeia_program_courses';
-    const AJAX_ACTION      = 'pcg_search_courses';
+    const PRICE_META_KEY  = 'politeia_program_price';
+    const GROUPS_META_KEY = 'politeia_program_groups';
+    const AJAX_ACTION     = 'pcg_search_groups';
     const NONCE_FIELD      = 'pcg_program_details_nonce';
 
     public function __construct() {
         add_action( 'add_meta_boxes', [ $this, 'register_metabox' ] );
         add_action( 'save_post', [ $this, 'save_metabox' ] );
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
-        add_action( 'wp_ajax_' . self::AJAX_ACTION, [ $this, 'ajax_search_courses' ] );
+        add_action( 'wp_ajax_' . self::AJAX_ACTION, [ $this, 'ajax_search_groups' ] );
     }
 
     public function register_metabox() {
@@ -31,10 +31,10 @@ class PCG_Metaboxes {
     public function render_metabox( $post ) {
         wp_nonce_field( 'pcg_program_details_action', self::NONCE_FIELD );
 
-        $price   = get_post_meta( $post->ID, self::PRICE_META_KEY, true );
-        $courses = $this->get_saved_courses( $post->ID );
+        $price  = get_post_meta( $post->ID, self::PRICE_META_KEY, true );
+        $groups = $this->get_saved_groups( $post->ID );
 
-        $course_ids = array_map( 'absint', array_keys( $courses ) );
+        $group_ids = array_map( 'absint', array_keys( $groups ) );
         ?>
         <div class="pcg-program-field components-base-control">
             <label for="pcg-program-price"><strong><?php esc_html_e( 'Precio', 'politeia-course-group' ); ?></strong></label>
@@ -50,25 +50,25 @@ class PCG_Metaboxes {
         </div>
 
         <div class="pcg-program-field components-base-control">
-            <label for="pcg-program-courses-input"><strong><?php esc_html_e( 'Cursos', 'politeia-course-group' ); ?></strong></label>
-            <div class="pcg-courses-field">
-                <div class="pcg-courses-tags tagchecklist" aria-live="polite">
-                    <?php foreach ( $courses as $course_id => $course_title ) : ?>
-                        <span class="pcg-course-tag" data-course-id="<?php echo esc_attr( $course_id ); ?>" data-course-title="<?php echo esc_attr( $course_title ); ?>">
-                            <span class="pcg-course-tag__label"><?php echo esc_html( $course_title ); ?></span>
-                            <button type="button" class="pcg-course-tag__remove" aria-label="<?php esc_attr_e( 'Eliminar curso', 'politeia-course-group' ); ?>">&times;</button>
+            <label for="pcg-program-groups-input"><strong><?php esc_html_e( 'Grupos', 'politeia-course-group' ); ?></strong></label>
+            <div class="pcg-groups-field">
+                <div class="pcg-groups-tags tagchecklist" aria-live="polite">
+                    <?php foreach ( $groups as $group_id => $group_title ) : ?>
+                        <span class="pcg-group-tag" data-group-id="<?php echo esc_attr( $group_id ); ?>" data-group-title="<?php echo esc_attr( $group_title ); ?>">
+                            <span class="pcg-group-tag__label"><?php echo esc_html( $group_title ); ?></span>
+                            <button type="button" class="pcg-group-tag__remove" aria-label="<?php esc_attr_e( 'Eliminar grupo', 'politeia-course-group' ); ?>">&times;</button>
                         </span>
                     <?php endforeach; ?>
                 </div>
                 <input
                     type="text"
-                    id="pcg-program-courses-input"
-                    class="pcg-courses-input"
-                    placeholder="<?php esc_attr_e( 'Busca y selecciona cursos...', 'politeia-course-group' ); ?>"
+                    id="pcg-program-groups-input"
+                    class="pcg-groups-input"
+                    placeholder="<?php esc_attr_e( 'Busca y selecciona grupos...', 'politeia-course-group' ); ?>"
                     autocomplete="off"
                 />
-                <input type="hidden" class="pcg-courses-hidden" name="<?php echo esc_attr( self::COURSES_META_KEY ); ?>" value='<?php echo esc_attr( wp_json_encode( $course_ids ) ); ?>' />
-                <div class="pcg-courses-suggestions"></div>
+                <input type="hidden" class="pcg-groups-hidden" name="<?php echo esc_attr( self::GROUPS_META_KEY ); ?>" value='<?php echo esc_attr( wp_json_encode( $group_ids ) ); ?>' />
+                <div class="pcg-groups-suggestions"></div>
             </div>
         </div>
         <?php
@@ -103,22 +103,22 @@ class PCG_Metaboxes {
             delete_post_meta( $post_id, self::PRICE_META_KEY );
         }
 
-        if ( isset( $_POST[ self::COURSES_META_KEY ] ) ) {
-            $raw_courses = wp_unslash( $_POST[ self::COURSES_META_KEY ] );
-            $decoded     = json_decode( $raw_courses, true );
+        if ( isset( $_POST[ self::GROUPS_META_KEY ] ) ) {
+            $raw_groups = wp_unslash( $_POST[ self::GROUPS_META_KEY ] );
+            $decoded    = json_decode( $raw_groups, true );
 
             if ( is_array( $decoded ) ) {
                 $sanitized = array_values( array_unique( array_map( 'absint', $decoded ) ) );
                 if ( ! empty( $sanitized ) ) {
-                    update_post_meta( $post_id, self::COURSES_META_KEY, wp_json_encode( $sanitized ) );
+                    update_post_meta( $post_id, self::GROUPS_META_KEY, wp_json_encode( $sanitized ) );
                 } else {
-                    delete_post_meta( $post_id, self::COURSES_META_KEY );
+                    delete_post_meta( $post_id, self::GROUPS_META_KEY );
                 }
             } else {
-                delete_post_meta( $post_id, self::COURSES_META_KEY );
+                delete_post_meta( $post_id, self::GROUPS_META_KEY );
             }
         } else {
-            delete_post_meta( $post_id, self::COURSES_META_KEY );
+            delete_post_meta( $post_id, self::GROUPS_META_KEY );
         }
     }
 
@@ -133,19 +133,19 @@ class PCG_Metaboxes {
         }
 
         wp_enqueue_style( 'pcg-metaboxes', PCG_URL . 'assets/css/pcg-metaboxes.css', [], '1.0.0' );
-        wp_enqueue_script( 'pcg-courses-field', PCG_URL . 'assets/js/pcg-courses-field.js', [ 'jquery' ], '1.0.0', true );
-        wp_localize_script( 'pcg-courses-field', 'pcgCoursesField', [
+        wp_enqueue_script( 'pcg-groups-field', PCG_URL . 'assets/js/pcg-groups-field.js', [ 'jquery' ], '1.0.0', true );
+        wp_localize_script( 'pcg-groups-field', 'pcgGroupsField', [
             'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-            'nonce'   => wp_create_nonce( 'pcg_courses_search' ),
+            'nonce'   => wp_create_nonce( 'pcg_groups_search' ),
             'action'  => self::AJAX_ACTION,
             'labels'  => [
-                'remove' => __( 'Eliminar curso', 'politeia-course-group' ),
+                'remove' => __( 'Eliminar grupo', 'politeia-course-group' ),
             ],
         ] );
     }
 
-    public function ajax_search_courses() {
-        check_ajax_referer( 'pcg_courses_search', 'nonce' );
+    public function ajax_search_groups() {
+        check_ajax_referer( 'pcg_groups_search', 'nonce' );
 
         if ( ! current_user_can( 'edit_posts' ) ) {
             wp_send_json_error( __( 'No tienes permisos suficientes.', 'politeia-course-group' ), 403 );
@@ -153,8 +153,8 @@ class PCG_Metaboxes {
 
         $query = isset( $_POST['q'] ) ? sanitize_text_field( wp_unslash( $_POST['q'] ) ) : '';
 
-        $courses_query = new WP_Query( [
-            'post_type'      => 'sfwd-courses',
+        $groups_query = new WP_Query( [
+            'post_type'      => 'groups',
             'post_status'    => 'publish',
             'posts_per_page' => -1,
             's'              => $query,
@@ -165,11 +165,11 @@ class PCG_Metaboxes {
 
         $results = [];
 
-        if ( ! empty( $courses_query->posts ) ) {
-            foreach ( $courses_query->posts as $course_id ) {
+        if ( ! empty( $groups_query->posts ) ) {
+            foreach ( $groups_query->posts as $group_id ) {
                 $results[] = [
-                    'id'    => $course_id,
-                    'title' => get_the_title( $course_id ),
+                    'id'    => $group_id,
+                    'title' => get_the_title( $group_id ),
                 ];
             }
         }
@@ -177,8 +177,8 @@ class PCG_Metaboxes {
         wp_send_json_success( $results );
     }
 
-    private function get_saved_courses( $post_id ) {
-        $raw = get_post_meta( $post_id, self::COURSES_META_KEY, true );
+    private function get_saved_groups( $post_id ) {
+        $raw = get_post_meta( $post_id, self::GROUPS_META_KEY, true );
 
         if ( empty( $raw ) ) {
             return [];
@@ -197,8 +197,8 @@ class PCG_Metaboxes {
             return [];
         }
 
-        $courses = get_posts( [
-            'post_type'      => 'sfwd-courses',
+        $groups = get_posts( [
+            'post_type'      => 'groups',
             'post__in'       => $decoded,
             'posts_per_page' => -1,
             'orderby'        => 'post__in',
@@ -206,8 +206,8 @@ class PCG_Metaboxes {
 
         $formatted = [];
 
-        foreach ( $courses as $course ) {
-            $formatted[ $course->ID ] = $course->post_title;
+        foreach ( $groups as $group ) {
+            $formatted[ $group->ID ] = $group->post_title;
         }
 
         return $formatted;

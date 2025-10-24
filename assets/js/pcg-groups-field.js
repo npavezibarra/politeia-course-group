@@ -1,53 +1,53 @@
 (function($){
-    if (typeof window.pcgCoursesField === 'undefined') {
+    if (typeof window.pcgGroupsField === 'undefined') {
         return;
     }
 
-    var settings = window.pcgCoursesField;
+    var settings = window.pcgGroupsField;
     var removeLabel = settings.labels && settings.labels.remove ? settings.labels.remove : '×';
 
-    function initCoursesField($field){
-        var $input = $field.find('.pcg-courses-input');
-        var $hidden = $field.find('.pcg-courses-hidden');
-        var $tagsContainer = $field.find('.pcg-courses-tags');
-        var $suggestions = $field.find('.pcg-courses-suggestions');
-        var selectedCourses = [];
+    function initGroupsField($field){
+        var $input = $field.find('.pcg-groups-input');
+        var $hidden = $field.find('.pcg-groups-hidden');
+        var $tagsContainer = $field.find('.pcg-groups-tags');
+        var $suggestions = $field.find('.pcg-groups-suggestions');
+        var selectedGroups = [];
 
         function readInitialSelection(){
-            selectedCourses = [];
-            $tagsContainer.find('[data-course-id]').each(function(){
+            selectedGroups = [];
+            $tagsContainer.find('[data-group-id]').each(function(){
                 var $tag = $(this);
-                var id = parseInt($tag.attr('data-course-id'), 10);
-                var title = $tag.attr('data-course-title') || $tag.text();
+                var id = parseInt($tag.attr('data-group-id'), 10);
+                var title = $tag.attr('data-group-title') || $tag.text();
                 if(!isNaN(id)){
-                    selectedCourses.push({ id: id, title: title });
+                    selectedGroups.push({ id: id, title: title });
                 }
             });
             syncHiddenField();
         }
 
         function syncHiddenField(){
-            var ids = selectedCourses.map(function(item){ return item.id; });
+            var ids = selectedGroups.map(function(item){ return item.id; });
             $hidden.val(JSON.stringify(ids));
         }
 
         function renderTags(){
             $tagsContainer.empty();
-            selectedCourses.forEach(function(course){
+            selectedGroups.forEach(function(group){
                 var $tag = $('<span/>', {
-                    'class': 'pcg-course-tag',
-                    'data-course-id': course.id,
-                    'data-course-title': course.title
+                    'class': 'pcg-group-tag',
+                    'data-group-id': group.id,
+                    'data-group-title': group.title
                 });
 
                 $('<span/>', {
-                    'class': 'pcg-course-tag__label',
-                    text: course.title
+                    'class': 'pcg-group-tag__label',
+                    text: group.title
                 }).appendTo($tag);
 
                 $('<button/>', {
                     type: 'button',
-                    'class': 'pcg-course-tag__remove',
+                    'class': 'pcg-group-tag__remove',
                     'aria-label': removeLabel,
                     html: '&times;'
                 }).appendTo($tag);
@@ -56,13 +56,13 @@
             });
         }
 
-        function addCourse(course){
-            if(!course || !course.id){
+        function addGroup(group){
+            if(!group || !group.id){
                 return;
             }
 
-            var exists = selectedCourses.some(function(item){
-                return item.id === course.id;
+            var exists = selectedGroups.some(function(item){
+                return item.id === group.id;
             });
 
             if(exists){
@@ -71,15 +71,15 @@
                 return;
             }
 
-            selectedCourses.push(course);
+            selectedGroups.push(group);
             renderTags();
             syncHiddenField();
             clearSuggestions();
             $input.val('');
         }
 
-        function removeCourse(id){
-            selectedCourses = selectedCourses.filter(function(item){
+        function removeGroup(id){
+            selectedGroups = selectedGroups.filter(function(item){
                 return item.id !== id;
             });
             renderTags();
@@ -97,18 +97,18 @@
                 return;
             }
 
-            var $list = $('<ul/>', { 'class': 'pcg-courses-suggestions__list' });
+            var $list = $('<ul/>', { 'class': 'pcg-groups-suggestions__list' });
 
             results.forEach(function(item){
                 var $option = $('<li/>', {
-                    'class': 'pcg-courses-suggestions__item',
+                    'class': 'pcg-groups-suggestions__item',
                     text: item.title,
                     'data-id': item.id
                 });
 
                 $option.on('mousedown', function(e){
                     e.preventDefault();
-                    addCourse({ id: item.id, title: item.title });
+                    addGroup({ id: item.id, title: item.title });
                 });
 
                 $list.append($option);
@@ -117,7 +117,7 @@
             $suggestions.append($list).show();
         }
 
-        function searchCourses(query){
+        function searchGroups(query){
             if(!query || query.length < 2){
                 clearSuggestions();
                 return;
@@ -143,34 +143,34 @@
 
         $input.on('input', function(){
             var value = $(this).val();
-            searchCourses(value);
+            searchGroups(value);
         });
 
         $input.on('keydown', function(event){
             if(event.key === 'Enter'){
                 event.preventDefault();
-                var $firstSuggestion = $suggestions.find('.pcg-courses-suggestions__item').first();
+                var $firstSuggestion = $suggestions.find('.pcg-groups-suggestions__item').first();
                 if($firstSuggestion.length){
-                    addCourse({
+                    addGroup({
                         id: parseInt($firstSuggestion.data('id'), 10),
                         title: $firstSuggestion.text()
                     });
                 }
-            } else if(event.key === 'Backspace' && !$(this).val().length && selectedCourses.length){
-                removeCourse(selectedCourses[selectedCourses.length - 1].id);
+            } else if(event.key === 'Backspace' && !$(this).val().length && selectedGroups.length){
+                removeGroup(selectedGroups[selectedGroups.length - 1].id);
             }
         });
 
-        $tagsContainer.on('click', '.pcg-course-tag__remove', function(){
-            var $tag = $(this).closest('[data-course-id]');
-            var id = parseInt($tag.attr('data-course-id'), 10);
+        $tagsContainer.on('click', '.pcg-group-tag__remove', function(){
+            var $tag = $(this).closest('[data-group-id]');
+            var id = parseInt($tag.attr('data-group-id'), 10);
             if(!isNaN(id)){
-                removeCourse(id);
+                removeGroup(id);
             }
         });
 
         $(document).on('click', function(event){
-            if(!$(event.target).closest('.pcg-courses-field').length){
+            if(!$(event.target).closest('.pcg-groups-field').length){
                 clearSuggestions();
             }
         });
@@ -179,8 +179,8 @@
     }
 
     $(document).ready(function(){
-        $('.pcg-courses-field').each(function(){
-            initCoursesField($(this));
+        $('.pcg-groups-field').each(function(){
+            initGroupsField($(this));
         });
     });
 })(jQuery);
