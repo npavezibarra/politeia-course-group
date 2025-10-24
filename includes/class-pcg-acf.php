@@ -6,52 +6,32 @@ class PCG_ACF {
 
     public function register_fields() {
         acf_add_local_field_group([
-            'key' => 'group_pcg_program',
-            'title' => 'Detalles del Programa Filosófico',
+            'key' => 'group_pcg_programa_politeia_details',
+            'title' => 'Detalles del Programa Politeia',
             'fields' => [
                 [
+                    'key' => 'field_precio_programa',
+                    'label' => 'Precio',
+                    'name' => 'precio_programa',
+                    'type' => 'number',
+                    'show_in_rest' => 1,
+                ],
+                [
                     'key' => 'field_related_groups',
-                    'label' => 'Grupos Asociados',
+                    'label' => 'Grupos de Cursos',
                     'name' => 'related_groups',
                     'type' => 'relationship',
-                    'post_type' => ['groups'],
-                    'instructions' => 'Selecciona los grupos de cursos incluidos en este programa.',
+                    'post_type' => [ 'groups' ],
+                    'filters' => [ 'search' ],
                     'return_format' => 'id',
+                    'show_in_rest' => 1,
                 ],
-                [
-                    'key' => 'field_program_price',
-                    'label' => 'Precio del Programa',
-                    'name' => 'program_price',
-                    'type' => 'number',
-                    'prepend' => '$',
-                ],
-                [
-                    'key' => 'field_audio_intro',
-                    'label' => 'Audio Introductorio',
-                    'name' => 'audio_intro',
-                    'type' => 'url',
-                ],
-                [
-                    'key' => 'field_program_level',
-                    'label' => 'Nivel del Programa',
-                    'name' => 'program_level',
-                    'type' => 'select',
-                    'choices' => [
-                        'beginner' => 'Principiante',
-                        'intermediate' => 'Intermedio',
-                        'advanced' => 'Avanzado'
-                    ]
-                ],
-                [
-                    'key' => 'field_cta_url',
-                    'label' => 'Botón de Acción (URL)',
-                    'name' => 'cta_url',
-                    'type' => 'url',
-                ]
             ],
             'location' => [[
                 ['param' => 'post_type', 'operator' => '==', 'value' => 'course_program'],
             ]],
+            'position' => 'side',
+            'show_in_rest' => 1,
         ]);
     }
 }
