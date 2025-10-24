@@ -164,7 +164,7 @@ if ( have_posts() ) {
                                             $group_image_output = $group_image ? $group_image : $group_placeholder;
 
                                             printf(
-                                                '<a href="%1$s" class="flex items-center justify-center p-2 rounded-lg hover:bg-gray-50 transition duration-150" style="gap:10px;">
+                                                '<a href="%1$s" class="flex items-center p-2 rounded-lg hover:bg-gray-50 transition duration-150" style="display:flex;align-items:center;justify-content:flex-start;gap:10px;">
                                                     <img src="%2$s" alt="%3$s" class="w-10 h-10 object-cover shadow-md" style="border-radius:6px;" />
                                                     <span class="text-gray-800 font-medium">%4$s</span>
                                                 </a>',
