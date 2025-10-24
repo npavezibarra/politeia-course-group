@@ -44,6 +44,9 @@ add_action( 'plugins_loaded', function() {
     // REST endpoints
     new PCG_REST();
 
+    // Metaboxes
+    new PCG_Metaboxes();
+
 });
 
 add_action( 'plugins_loaded', function() {
