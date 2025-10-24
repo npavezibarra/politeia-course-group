@@ -130,36 +130,62 @@ if ( have_posts() ) {
                     </div>
 
                     <aside class="pcg-program-ramos">
-                        <h2 class="pcg-section-title"><?php esc_html_e( 'Ramos', 'politeia-course-group' ); ?></h2>
-                        <div id="ramos-list" class="pcg-card pcg-ramos-list">
-                            <?php if ( ! empty( $group_posts ) ) : ?>
-                                <?php foreach ( $group_posts as $group_post ) :
-                                    $thumbnail_url = get_the_post_thumbnail_url( $group_post, 'medium' );
-                                    ?>
-                                    <article class="pcg-ramo">
-                                        <a class="pcg-ramo-thumb" href="<?php echo esc_url( get_permalink( $group_post ) ); ?>">
-                                            <?php if ( $thumbnail_url ) : ?>
-                                                <img src="<?php echo esc_url( $thumbnail_url ); ?>" alt="<?php echo esc_attr( get_the_title( $group_post ) ); ?>" />
-                                            <?php else : ?>
-                                                <span class="pcg-ramo-thumb__placeholder"><?php esc_html_e( 'Sin imagen', 'politeia-course-group' ); ?></span>
-                                            <?php endif; ?>
-                                        </a>
-                                        <div class="pcg-ramo-info">
-                                            <h3 class="pcg-ramo-title">
-                                                <a href="<?php echo esc_url( get_permalink( $group_post ) ); ?>"><?php echo esc_html( get_the_title( $group_post ) ); ?></a>
-                                            </h3>
-                                            <span class="pcg-ramo-meta">
-                                                <?php
-                                                $group_type_object = get_post_type_object( $group_post->post_type );
-                                                echo esc_html( $group_type_object ? $group_type_object->labels->singular_name : '' );
-                                                ?>
-                                            </span>
-                                        </div>
-                                    </article>
-                                <?php endforeach; ?>
-                            <?php else : ?>
-                                <p class="pcg-ramos-empty"><?php esc_html_e( 'No hay ramos asociados a este programa por el momento.', 'politeia-course-group' ); ?></p>
-                            <?php endif; ?>
+                        <div class="lg:col-span-1">
+                            <h2 class="text-2xl font-bold text-gray-800 mb-4 border-b pb-2"><?php esc_html_e( 'Ramos', 'politeia-course-group' ); ?></h2>
+                            <div class="bg-white p-5 rounded-lg border border-gray-300 card-shadow">
+                                <?php
+                                $group_ids = get_post_meta( get_the_ID(), 'politeia_program_groups', true );
+                                if ( is_string( $group_ids ) ) {
+                                    $decoded_group_ids = json_decode( $group_ids, true );
+                                    if ( json_last_error() === JSON_ERROR_NONE ) {
+                                        $group_ids = $decoded_group_ids;
+                                    }
+                                }
+
+                                if ( ! empty( $group_ids ) && is_array( $group_ids ) ) {
+                                    echo '<div class="space-y-4">';
+                                    $has_valid_groups = false;
+
+                                    foreach ( $group_ids as $group_id ) {
+                                        $group_id = absint( $group_id );
+
+                                        if ( 0 === $group_id ) {
+                                            continue;
+                                        }
+
+                                        $group = get_post( $group_id );
+
+                                        if ( $group && 'groups' === $group->post_type ) {
+                                            $has_valid_groups   = true;
+                                            $group_title        = get_the_title( $group_id );
+                                            $group_permalink    = get_permalink( $group_id );
+                                            $group_image        = get_the_post_thumbnail_url( $group_id, 'thumbnail' );
+                                            $group_placeholder  = 'https://placehold.co/80x80/777/fff?text=GR';
+                                            $group_image_output = $group_image ? $group_image : $group_placeholder;
+
+                                            printf(
+                                                '<a href="%1$s" class="flex items-center p-2 rounded-lg hover:bg-gray-50 transition duration-150" style="display:flex;align-items:center;justify-content:flex-start;gap:10px;">
+                                                    <img src="%2$s" alt="%3$s" class="w-10 h-10 object-cover shadow-md" style="border-radius:6px;" />
+                                                    <span class="text-gray-800 font-medium">%4$s</span>
+                                                </a>',
+                                                esc_url( $group_permalink ),
+                                                esc_url( $group_image_output ),
+                                                esc_attr( $group_title ),
+                                                esc_html( $group_title )
+                                            );
+                                        }
+                                    }
+
+                                    if ( ! $has_valid_groups ) {
+                                        echo '<p class="text-gray-600 italic">' . esc_html__( 'No hay grupos asociados a este programa.', 'politeia-course-group' ) . '</p>';
+                                    }
+
+                                    echo '</div>';
+                                } else {
+                                    echo '<p class="text-gray-600 italic">' . esc_html__( 'No hay grupos asociados a este programa.', 'politeia-course-group' ) . '</p>';
+                                }
+                                ?>
+                            </div>
                         </div>
                     </aside>
                 </section>
