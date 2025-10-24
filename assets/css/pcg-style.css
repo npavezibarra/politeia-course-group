@@ -11,19 +11,56 @@
 }
 
 #politeia-program-header {
-    background: var(--bb-primary, #2563eb);
+    position: relative;
     color: #fff;
-    padding: 32px 36px;
-    border-radius: 12px 12px 0 0;
+    padding: 48px 32px;
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    justify-content: flex-end;
+    min-height: 280px;
+    background-color: #000;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+#politeia-program-header::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
+
+#politeia-program-header.has-featured-image::before {
+    opacity: 1;
+}
+
+#politeia-program-header .politeia-program-header-inner {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+#politeia-program-header h1 {
+    font-size: clamp(32px, 3vw, 48px);
+    font-weight: 800;
+    margin: 0;
+    margin-bottom: 8px;
+}
+
+#politeia-program-header .program-meta {
+    font-size: 1rem;
+    font-weight: 500;
+    opacity: 0.9;
+    margin: 0;
 }
 
 .pcg-program-title {
-    font-size: clamp(2rem, 3vw, 2.75rem);
-    font-weight: 700;
-    margin: 0;
+    color: inherit;
 }
 
 .pcg-header-content {

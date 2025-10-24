@@ -58,33 +58,66 @@ if ( have_posts() ) {
             ),
             $program_id
         );
+        $featured_image_url   = get_the_post_thumbnail_url( $program_id, 'large' );
+        $header_style         = $featured_image_url ? 'background-image: url(' . esc_url( $featured_image_url ) . ');' : 'background-color: #000;';
+        $header_class         = $featured_image_url ? 'has-featured-image' : 'no-featured-image';
+        $program_duration     = get_post_meta( $program_id, 'politeia_program_duration', true );
+        $header_meta_segments = array();
+
+        if ( $group_count > 0 ) {
+            $header_meta_segments[] = sprintf( _n( '%s Grupo', '%s Grupos', $group_count, 'politeia-course-group' ), number_format_i18n( $group_count ) );
+        }
+
+        if ( ! empty( $program_duration ) ) {
+            $header_meta_segments[] = wp_strip_all_tags( $program_duration );
+        }
+
+        if ( ! empty( $program_price ) ) {
+            $header_meta_segments[] = wp_strip_all_tags( $program_price );
+        }
+
+        /**
+         * Filters the pieces that compose the program header metadata line.
+         *
+         * @param string[] $header_meta_segments The metadata segments to output.
+         * @param int      $program_id           The current program ID.
+         */
+        $header_meta_segments = apply_filters( 'politeia_program_header_meta_segments', $header_meta_segments, $program_id );
+
+        $header_meta_text = implode( ' · ', array_filter( array_map( 'trim', $header_meta_segments ) ) );
         ?>
 
         <main id="primary" class="site-main" role="main">
             <div class="pcg-program-wrap">
-                <header id="politeia-program-header">
-                    <h1 class="pcg-program-title"><?php the_title(); ?></h1>
+                <header id="politeia-program-header" class="<?php echo esc_attr( $header_class ); ?>" style="<?php echo esc_attr( $header_style ); ?>">
+                    <div class="politeia-program-header-inner">
+                        <h1 class="pcg-program-title"><?php the_title(); ?></h1>
 
-                    <div class="pcg-header-content">
-                        <?php if ( ! empty( $program_summary ) ) : ?>
-                            <p class="pcg-header-summary"><?php echo esc_html( $program_summary ); ?></p>
+                        <?php if ( ! empty( $header_meta_text ) ) : ?>
+                            <p class="program-meta"><?php echo esc_html( $header_meta_text ); ?></p>
                         <?php endif; ?>
 
-                        <?php if ( $group_count > 0 || ! empty( $program_price ) ) : ?>
-                            <div class="pcg-header-tags">
-                                <?php if ( $group_count > 0 ) : ?>
-                                    <span class="pcg-header-tag">
-                                        <?php printf( _n( '%s Ramo', '%s Ramos', $group_count, 'politeia-course-group' ), number_format_i18n( $group_count ) ); ?>
-                                    </span>
-                                <?php endif; ?>
+                        <div class="pcg-header-content">
+                            <?php if ( ! empty( $program_summary ) ) : ?>
+                                <p class="pcg-header-summary"><?php echo esc_html( $program_summary ); ?></p>
+                            <?php endif; ?>
 
-                                <?php if ( ! empty( $program_price ) ) : ?>
-                                    <span class="pcg-header-tag pcg-header-tag--muted">
-                                        <?php echo esc_html( $program_price ); ?>
-                                    </span>
-                                <?php endif; ?>
-                            </div>
-                        <?php endif; ?>
+                            <?php if ( $group_count > 0 || ! empty( $program_price ) ) : ?>
+                                <div class="pcg-header-tags">
+                                    <?php if ( $group_count > 0 ) : ?>
+                                        <span class="pcg-header-tag">
+                                            <?php printf( _n( '%s Ramo', '%s Ramos', $group_count, 'politeia-course-group' ), number_format_i18n( $group_count ) ); ?>
+                                        </span>
+                                    <?php endif; ?>
+
+                                    <?php if ( ! empty( $program_price ) ) : ?>
+                                        <span class="pcg-header-tag pcg-header-tag--muted">
+                                            <?php echo esc_html( $program_price ); ?>
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 </header>
 
